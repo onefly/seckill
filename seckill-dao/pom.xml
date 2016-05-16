@@ -16,11 +16,6 @@
             <artifactId>seckill-entity</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!--dao框架:mybatis依赖-->
-        <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis</artifactId>
-        </dependency>
     </dependencies>
 
 
