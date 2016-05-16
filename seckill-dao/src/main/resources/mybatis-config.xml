@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <settings>
-        <!--获取自增主键值-->
+        <!--允许 JDBC 支持自动生成主键，需要驱动兼容。 如果设置为 true 则这个设置强制使用自动生成主键，尽管一些驱动不能兼容但仍可正常工作（比如 Derby）-->
         <setting name="useGeneratedKeys" value="true"/>
         <!--使用列别名替换列名-->
         <setting name="useColumnLabel" value="true"/>
