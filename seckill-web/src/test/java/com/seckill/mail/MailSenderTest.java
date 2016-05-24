@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.ui.velocity.VelocityEngineUtils;
@@ -49,5 +50,23 @@ public class MailSenderTest {
         String text = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,"template/hello.vm",encoding,model);
         helper.setText(text,true);
         mailSender.send(message);
+    }
+    @Test
+    public void testTemplateMail2() throws MessagingException {
+        MimeMessagePreparator preparator = new MimeMessagePreparator() {
+            public void prepare(MimeMessage mimeMessage) throws Exception {
+                MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
+                message.setTo("caozhifei@jd.com");
+                message.setFrom("cao_zhifei@sina.com"); // could be parameterized...
+                message.setSubject("邮件发送测试");
+                Map model = new HashMap();
+                model.put("user", "tomcat");
+                model.put("text","template text !");
+                String text = VelocityEngineUtils.mergeTemplateIntoString(
+                        velocityEngine, "template/hello.vm", model);
+                message.setText(text, true);
+            }
+        };
+        this.mailSender.send(preparator);
     }
 }

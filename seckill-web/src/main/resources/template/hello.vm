@@ -4,7 +4,7 @@
 </head>
 <body>
  hello ${user}:
-    这里是velocity 模版 ，${text}.
-<img scr="http://img13.360buyimg.com/n1/s170x170_jfs/t2065/120/2149090341/172971/6b95b54b/56a0a9baNa77330ce.jpg" />
+    <h5>这里是velocity 模版 ，${text}.</h5>
+
 </body>
 </html>
