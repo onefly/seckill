@@ -1,0 +1,53 @@
+package com.seckill.mail;
+
+import org.apache.velocity.app.VelocityEngine;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.ui.velocity.VelocityEngineUtils;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by caozhifei on 2016/5/24.
+ */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration({"classpath:spring/spring-mail.xml"})
+public class MailSenderTest {
+    @Autowired
+    private JavaMailSender mailSender;
+    @Autowired
+    private VelocityEngine velocityEngine;
+    @Test
+    public void testSimpleMail(){
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("cao_zhifei@sina.com");
+        message.setTo("caozhifei@jd.com");
+        message.setSubject("spring send mail title2 标题");
+        message.setText("spring send mail content success");
+        mailSender.send(message);
+    }
+    @Test
+    public void testTemplateMail() throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        String encoding = "utf-8";
+        MimeMessageHelper helper = new MimeMessageHelper(message,encoding);
+        helper.setFrom("cao_zhifei@sina.com");
+        helper.setTo("caozhifei@jd.com");
+        helper.setSubject("spring send template mail title 标题");
+        Map<String, Object> model = new HashMap<String, Object>();
+        model.put("user","testuser");
+        model.put("text","template text !");
+        String text = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,"template/hello.vm",encoding,model);
+        helper.setText(text,true);
+        mailSender.send(message);
+    }
+}
