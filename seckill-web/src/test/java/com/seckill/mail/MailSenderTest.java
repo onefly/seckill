@@ -31,7 +31,7 @@ public class MailSenderTest {
     public void testSimpleMail(){
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("cao_zhifei@sina.com");
-        message.setTo("529352479@qq.com");
+        message.setTo("52****479@qq.com");
         message.setSubject("spring send mail title2 标题");
         message.setText("spring send mail content success");
         mailSender.send(message);
@@ -41,7 +41,7 @@ public class MailSenderTest {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
         helper.setFrom("cao_zhifei@sina.com");
-        helper.setTo("529352479@qq.com");
+        helper.setTo("52****479@qq.com");
         helper.setSubject("spring send template mail title 标题");
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("user","testuser");
@@ -55,7 +55,7 @@ public class MailSenderTest {
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-                message.setTo("529352479@qq.com");
+                message.setTo("52****479@qq.com");
                 message.setFrom("cao_zhifei@sina.com"); // could be parameterized...
                 message.setSubject("邮件发送测试");
                 Map model = new HashMap();
