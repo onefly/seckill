@@ -75,7 +75,9 @@ public class SeckillController {
         }
         SeckillExecution execution;
         try {
-             execution = seckillService.executeSeckill(id, phone, md5);
+             //execution = seckillService.executeSeckill(id, phone, md5);
+            //存储过程
+            execution = seckillService.executeSeckillProcedure(id, phone, md5);
             return new JsonResult<SeckillExecution>(true,execution);
         }catch (SeckillColseException e){
             execution = new SeckillExecution(id, SeckillStateEnum.END);

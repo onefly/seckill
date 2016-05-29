@@ -60,4 +60,29 @@ public class SeckillServiceTest {
             logger.warn("exposer={}",exposer);
         }
     }
+    /**
+     * 测试代码完整逻辑，可重复执行,利用存储过程实现
+     * @throws Exception
+     */
+    @Test
+    public void testSeckillLogicProcedure() throws Exception {
+        long id = 2;
+        Exposer exposer = seckillService.exportSeckillUrl(id);
+        if(exposer.isExposed()){
+            logger.info("exposer={}",exposer);
+            long userPhone = 15888888888L;
+            String md5 = exposer.getMd5();
+            try {
+                SeckillExecution execution = seckillService.executeSeckillProcedure(id, userPhone, md5);
+                logger.info("execution={}",execution);
+            }catch (RepeatKillException e){
+                logger.error(e.getMessage());
+            }catch (SeckillColseException e){
+                logger.error(e.getMessage());
+            }
+        }else {
+            //秒杀未开启
+            logger.warn("exposer={}",exposer);
+        }
+    }
 }

@@ -5,12 +5,14 @@
 <mapper namespace="com.seckill.dao.SeckillDao">
     <update id="reduceStock">
         <![CDATA[
+
         update seckill
          set stock = stock - 1
         where id = #{seckillId}
         and stock > 0
         and start_time < #{killTime}
         and end_time >= #{killTime}
+
         ]]>
     </update>
     <select id="queryById" resultType="Seckill">
@@ -27,4 +29,16 @@
         order by created desc
         limit #{offset},#{limit}
     </select>
- </mapper>
+
+    <!--mybatis调用存储过程-->
+    <select id="killByProcedure" statementType="CALLABLE">
+        call execute_seckill(
+            #{seckillId,jdbcType=BIGINT,mode=IN},
+            #{phone,jdbcType=BIGINT,mode=IN},
+            #{killTime,jdbcType=TIMESTAMP,mode=IN},
+            #{state,jdbcType=TINYINT,mode=IN},
+            #{result,jdbcType=INTEGER,mode=OUT}
+        )
+
+    </select>
+</mapper>
