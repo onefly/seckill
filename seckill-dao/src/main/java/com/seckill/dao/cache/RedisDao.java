@@ -3,6 +3,7 @@ package com.seckill.dao.cache;
 import com.dyuproject.protostuff.LinkedBuffer;
 import com.dyuproject.protostuff.ProtostuffIOUtil;
 import com.dyuproject.protostuff.runtime.RuntimeSchema;
+import com.seckill.common.SerializationUtil;
 import com.seckill.entity.Seckill;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ public class RedisDao {
     public RedisDao(String ip,int port) {
         this.jedisPool = new JedisPool(ip,port);
     }
-    private RuntimeSchema<Seckill> schema = RuntimeSchema.createFrom(Seckill.class);
+    //private RuntimeSchema<Seckill> schema = RuntimeSchema.createFrom(Seckill.class);
     public Seckill getSeckill(long seckillId){
         //redis 操作逻辑
         try {
@@ -30,8 +31,7 @@ public class RedisDao {
                 //采用自定义序列化
                 byte[] data = jedis.get(key.getBytes());
                 if(data != null){
-                    Seckill seckill = schema.newMessage();
-                    ProtostuffIOUtil.mergeFrom(data,seckill,schema);
+                    Seckill seckill = SerializationUtil.deserializer(data,Seckill.class);
                     //seckill 反序列化完成
                     return seckill;
                 }
@@ -52,8 +52,7 @@ public class RedisDao {
                 String key = getCacheKey(seckill.getId());
                 //并没有实现内部序列化操作
                 //采用自定义序列化
-                byte[] data =ProtostuffIOUtil.toByteArray(seckill, schema,
-                        LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+                byte[] data =SerializationUtil.serializer(seckill);
                 int timeout = 2*60;
                 String result = jedis.setex(key.getBytes(),timeout,data);
                 return result;

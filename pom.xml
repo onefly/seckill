@@ -13,6 +13,7 @@
         <module>seckill-dao</module>
         <module>seckill-entity</module>
         <module>seckill-service</module>
+        <module>seckill-common</module>
     </modules>
     <properties>
         <spring.version>4.2.3.RELEASE</spring.version>
