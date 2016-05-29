@@ -3,13 +3,38 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
-       xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 
-<!-- 自动扫描且只扫描@Controller -->
-<context:component-scan base-package="com.seckill.controller" />
+    <!-- 自动扫描且只扫描@Controller -->
+    <context:component-scan base-package="com.seckill.web"/>
 
-<mvc:annotation-driven />
+    <mvc:annotation-driven/>
+
+    <!-- 静态资源默认servlet配置,处理静态资源, 允许使用"/" 做整体映射 -->
+    <mvc:default-servlet-handler />
+
+    <bean class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+        <property name="resourceLoaderPath" value="WEB-INF/vm,classpath:com.jd"/>
+        <property name="velocityProperties">
+            <props>
+                <!-- 指定模板引擎进行模板处理的编码 -->
+                <prop key="input.encoding">UTF-8</prop>
+                <!-- 指定输出流的编码 -->
+                <prop key="output.encoding">UTF-8</prop>
+                <!-- 不缓存，少量模板时使用 -->
+                <prop key="spring.resource.loader.cache">false</prop>
+            </props>
+        </property>
+    </bean>
+
+
+    <bean class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
+        <property name="prefix" value=""/>
+        <property name="suffix" value=".vm"/>
+        <property name="cache" value="false"/>
+        <property name="contentType" value="text/html;charset=UTF-8"/>
+        <property name="dateToolAttribute" value="dateTool"/>
+    </bean>
+
 </beans>

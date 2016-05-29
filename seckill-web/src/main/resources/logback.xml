@@ -7,10 +7,10 @@
     </layout>
   </appender>
   
-  <logger name="com.seckill" level="DEBUG"/>
+  <logger name="com.seckill" level="info"/>
   
 
-  <root level="debug">
+  <root level="info">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>
