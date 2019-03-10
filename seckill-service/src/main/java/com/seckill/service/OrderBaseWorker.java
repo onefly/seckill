@@ -18,10 +18,7 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +28,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class OrderBaseWorker {
-    private int workerHandlerNum = 16;
+    private int customerThreadSize = 8;
+    private int produceThreadSize = 2;
     private volatile boolean runging = false;
     private Disruptor<GenericEvent<OrderBase>> disruptor;
     @Autowired
@@ -57,22 +55,19 @@ public class OrderBaseWorker {
     }
 
     private void produceData(GenericEventProducer<OrderBase> producer) {
-        String ip = "127.0.0.1";
-        while (runging) {
+        ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(produceThreadSize,
+                new BasicThreadFactory.Builder().namingPattern("produceQueue-pool-%d").daemon(true).build());
+        executorService.scheduleAtFixedRate(() ->
+        {
+            String ip= "127.0.0.1";
             orderBaseService.updateWorkerIpByStatus(ip, TaskStatus.WAIT_RUN.getValue());
             List<OrderBase> list = orderBaseService.getOrderBaseList(ip,TaskStatus.WAIT_RUN.getValue());
             for(OrderBase orderBase : list) {
                 producer.onData(orderBase);
                 orderBaseService.updateStatusById(orderBase.getId(),TaskStatus.RUNNING.getValue());
             }
-            if(CollectionUtils.isEmpty(list) || list.size() < 1024){
-                try {
-                    TimeUnit.SECONDS.sleep(1L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        },1000,1000, TimeUnit.MILLISECONDS);
+        System.out.println("produce date start @@@@@@@@@@@@@@@@@@@@@@@@@@ ");
     }
 
     @PreDestroy
@@ -85,13 +80,13 @@ public class OrderBaseWorker {
     private void doAfterDisruptorStart(RingBuffer<GenericEvent<OrderBase>> ringBuffer) {
         ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1,
                 new BasicThreadFactory.Builder().namingPattern("remainingCapacity-monitoring-pool-%d").daemon(true).build());
-        executorService.scheduleAtFixedRate(() -> System.out.println("remainingCapacity=========:" + ringBuffer.remainingCapacity()),1000,3000, TimeUnit.MICROSECONDS);
+        executorService.scheduleAtFixedRate(() -> System.out.println("remainingCapacity=========:" + ringBuffer.remainingCapacity()),1,1, TimeUnit.MINUTES);
         System.out.println("start worker success ######################");
     }
 
     private void addHandler(Disruptor<GenericEvent<OrderBase>> disruptor) {
-        WorkHandler<GenericEvent<OrderBase>>[] workHandlers = new WorkHandler[workerHandlerNum];
-        for(int i=0;i< workerHandlerNum ;i++){
+        WorkHandler<GenericEvent<OrderBase>>[] workHandlers = new WorkHandler[customerThreadSize];
+        for(int i=0;i< customerThreadSize ;i++){
             workHandlers[i] = orderBaseGenericEvent -> {
                 OrderBase orderBase = orderBaseGenericEvent.get();
                 System.out.println(" worker receive ######################"+orderBase);
