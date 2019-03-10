@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.seckill.dao.OrderBaseDao">
+    <!--增加innore，忽略主键冲突-->
+    <select id="getOrderBaseList" resultType="com.seckill.entity.OrderBase">
+      SELECT * FROM order_base
+      WHERE worker_ip = #{workerIp} AND status = #{status}
+    </select>
+    <update id="updateWorkerIpByStatus">
+        UPDATE order_base
+        SET worker_ip = #{workerIp}
+        WHERE status = #{status} AND worker_ip is NULL
+    </update>
+    <update id="updateStatusById">
+        UPDATE order_base
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+</mapper>
