@@ -11,6 +11,7 @@ import com.seckill.common.task.GenericWorkHandler;
 import com.seckill.entity.OrderBase;
 import com.seckill.entity.TaskStatus;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -80,13 +83,9 @@ public class OrderBaseWorker {
         }
     }
     private void doAfterDisruptorStart(RingBuffer<GenericEvent<OrderBase>> ringBuffer) {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                System.out.println("剩余坑位:" + ringBuffer.remainingCapacity());
-            }
-        }, 1000, 2000);
+        ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1,
+                new BasicThreadFactory.Builder().namingPattern("remainingCapacity-monitoring-pool-%d").daemon(true).build());
+        executorService.scheduleAtFixedRate(() -> System.out.println("remainingCapacity=========:" + ringBuffer.remainingCapacity()),1000,3000, TimeUnit.MICROSECONDS);
         System.out.println("start worker success ######################");
     }
 
@@ -96,7 +95,7 @@ public class OrderBaseWorker {
             workHandlers[i] = orderBaseGenericEvent -> {
                 OrderBase orderBase = orderBaseGenericEvent.get();
                 System.out.println(" worker receive ######################"+orderBase);
-                Assert.notNull(orderBase.getJson(),"业务数据json is null");
+                Assert.notNull(orderBase.getJson(), "业务数据json is null");
                 orderBaseService.updateStatusById(orderBase.getId(),TaskStatus.RUN_SUCCESS.getValue());
             };
         }
