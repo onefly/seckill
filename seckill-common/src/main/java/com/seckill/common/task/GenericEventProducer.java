@@ -14,11 +14,14 @@ public class GenericEventProducer<T> {
     }
 
     public void onData(T data) {
-        long sequence = ringBuffer.next();  // Grab the next sequence 获取下一个sequence
+        // Grab the next sequence 获取下一个sequence
+        long sequence = ringBuffer.next();
         try {
-            GenericEvent<T> event = ringBuffer.get(sequence); // Get the entry in the Disruptor 获取entry对象
+            // Get the entry in the Disruptor 获取entry对象
+            GenericEvent<T> event = ringBuffer.get(sequence);
             // for the sequence 对应sequence位置上的event
-            event.set(data);  // Fill with data 填充业务数据
+            // Fill with data 填充业务数据
+            event.set(data);
         } finally {
             ringBuffer.publish(sequence);
         }

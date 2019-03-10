@@ -48,7 +48,7 @@ public class OrderBaseWorker {
     }
 
     private void produceData(GenericEventProducer<OrderBase> producer) {
-        String ip = "192.168.21.99";
+        String ip = "127.0.0.1";
         while (runging) {
             orderBaseService.updateWorkerIpByStatus(ip, TaskStatus.WAIT_RUN.getValue());
             List<OrderBase> list = orderBaseService.getOrderBaseList(ip,TaskStatus.WAIT_RUN.getValue());
