@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class OrderBaseWorker {
+    private int workerHandlerNum = 16;
     private volatile boolean runging = false;
     private Disruptor<GenericEvent<OrderBase>> disruptor;
     @Autowired
@@ -78,10 +80,14 @@ public class OrderBaseWorker {
     }
 
     private void addHandler(Disruptor<GenericEvent<OrderBase>> disruptor) {
-        disruptor.handleEventsWithWorkerPool(orderBaseGenericEvent -> {
-            OrderBase orderBase = orderBaseGenericEvent.get();
-            System.out.println(" worker receive ######################"+orderBase);
-            orderBaseService.updateStatusById(orderBase.getId(),TaskStatus.RUN_SUCCESS.getValue());
-        });
+        WorkHandler<GenericEvent<OrderBase>>[] workHandlers = new WorkHandler[workerHandlerNum];
+        for(int i=0;i< workerHandlerNum ;i++){
+            workHandlers[i] = orderBaseGenericEvent -> {
+                OrderBase orderBase = orderBaseGenericEvent.get();
+                System.out.println(" worker receive ######################"+orderBase);
+                orderBaseService.updateStatusById(orderBase.getId(),TaskStatus.RUN_SUCCESS.getValue());
+            };;
+        }
+        disruptor.handleEventsWithWorkerPool(workHandlers);
     }
 }
