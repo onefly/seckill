@@ -1,5 +1,6 @@
 package com.seckill.service;
 
+import com.lmax.disruptor.ExceptionHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -12,11 +13,14 @@ import com.seckill.entity.TaskStatus;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,6 +80,13 @@ public class OrderBaseWorker {
         }
     }
     private void doAfterDisruptorStart(RingBuffer<GenericEvent<OrderBase>> ringBuffer) {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("剩余坑位:" + ringBuffer.remainingCapacity());
+            }
+        }, 1000, 2000);
         System.out.println("start worker success ######################");
     }
 
@@ -85,9 +96,30 @@ public class OrderBaseWorker {
             workHandlers[i] = orderBaseGenericEvent -> {
                 OrderBase orderBase = orderBaseGenericEvent.get();
                 System.out.println(" worker receive ######################"+orderBase);
+                Assert.notNull(orderBase.getJson(),"业务数据json is null");
                 orderBaseService.updateStatusById(orderBase.getId(),TaskStatus.RUN_SUCCESS.getValue());
-            };;
+            };
         }
         disruptor.handleEventsWithWorkerPool(workHandlers);
+
+        //异常处理
+        disruptor.setDefaultExceptionHandler(new ExceptionHandler<GenericEvent<OrderBase>>() {
+            @Override
+            public void handleEventException(Throwable throwable, long l, GenericEvent<OrderBase> orderBaseGenericEvent) {
+                OrderBase orderBase = orderBaseGenericEvent.get();
+                System.out.print("执行异常："+throwable.getMessage());
+                orderBaseService.updateStatusById(orderBase.getId(),TaskStatus.WAIT_RETRY.getValue());
+            }
+
+            @Override
+            public void handleOnStartException(Throwable throwable) {
+
+            }
+
+            @Override
+            public void handleOnShutdownException(Throwable throwable) {
+
+            }
+        });
     }
 }
